@@ -16,7 +16,7 @@ library(rio)
 library(readr)
 library(tidyr)
 library(tidyverse)
-
+library(skimr)
 
 
 #1.1 Importar base de datos. 
@@ -160,8 +160,12 @@ data_2020[[10]]$ROcu <- 1
 
 
 
-
+#############################################
 #------------1.2 Unir Datos -----------------
+##############################################
+
+
+
 
 #Inicializar llaves de los dataframes para hacer los joins
 
@@ -349,6 +353,7 @@ BD_resto_2020$ano <- 2020
 rm(list = c("FT_DS","FT_IN", "FT_OC", "FT_OC_DS"))
 
 
+
 ########################################
 #Ahora combinamos las bases de cabecera por un lado
 #y las bases de resto por el otro
@@ -356,12 +361,64 @@ rm(list = c("FT_DS","FT_IN", "FT_OC", "FT_OC_DS"))
 
 BD_cabecera = full_join(BD_cabecera_2019, BD_cabecera_2020)
 
-#Note que agregamos una llave adicional: ano
 BD_resto = full_join(BD_resto_2019,BD_resto_2020)
+
+
+
+#Por ultimo, cambiare los NA por 0 en las columnas que identifican si la observacion
+#pertence a OC, DS o IN. 
+BD_cabecera$COcu[is.na(BD_cabecera$COcu)] <-0
+BD_cabecera$CDes[is.na(BD_cabecera$CDes)] <-0
+BD_cabecera$CIna[is.na(BD_cabecera$CIna)] <-0
+
+#Ahora le asignare a OC, DS e IN un valor distinto para identificar el grupo
+#al que pertenece cada observacion
+#OC = 1
+#DS = 2
+#IN  = 3
+BD_cabecera$CDes[BD_cabecera$CDes == 1] <-2
+BD_cabecera$CIna[BD_cabecera$CIna == 1] <-3
+#Añadir columna adicional a BD_cabecera para que identifique en una sola columna 
+#a que grupo (OC, DS, IN) pertenece la observacion
+BD_cabecera <- mutate(BD_cabecera, grupo_u = COcu+  CDes+  CIna)
+
+
+#Hacer lo mismo para BD_resto
+
+BD_resto$ROcu[is.na(BD_resto$ROcu)] <-0
+BD_resto$RDes[is.na(BD_resto$RDes)] <-0
+BD_resto$RIna[is.na(BD_resto$RIna)] <-0
+
+
+#Ahora le asignare a OC, DS e IN un valor distinto
+#OC = 1
+#DS = 2
+#IN  = 3
+BD_resto$RDes[BD_resto$RDes == 1] <-2
+BD_resto$RIna[BD_resto$RIna == 1] <-3
+#Añadir columna adicional a BD_cabecera para que identifique en una sola columna 
+#a que grupo (OC, DS, IN) pertenece la observacion
+BD_resto <- mutate(BD_resto, grupo_r = ROcu +  RDes + RIna)
+
 
 #Limpiar consola y dejar solo BD_resto y BD_cabecera
 rm(list = setdiff(ls(),c("BD_cabecera","BD_resto")))
 
 
 
-#
+#############################################
+#------------1.3 Una base nacional -----------------
+##############################################
+
+#agregar columna a cada BD para después identificar las observaciones por zona (urbana/rural)
+BD_cabecera$zona <- "urbana"
+BD_resto$zona <- "rural"
+
+
+BD_nacional = full_join(BD_cabecera,BD_resto)
+  
+  
+  
+  
+  
+  
