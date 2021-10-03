@@ -14,6 +14,8 @@ rm(list = ls())
 library(pacman)
 library(rio)
 library(readr)
+library(tidyr)
+library(tidyverse)
 
 
 
@@ -135,26 +137,26 @@ data_2020[[10]]$ROcu <- 1
 ##Agregarle un distintivo al nombre de las columnas, por ejemplo, mes, para que se sepa a cual DF pertence
 #Esto se hace para cada DF
 #Esto es importante para poder distinguir mejor las columnas cuando se haga el full join en el punto 1.2
-names(data_2019[[2]]) <- append(c("directorio","secuencia_p","orden"),paste0("CDes_",colnames(data_2019[[2]][-1:-3])))
-names(data_2019[[3]]) <- append(c("directorio","secuencia_p","orden"),paste0("CFT_",colnames(data_2019[[3]][-1:-3])))
-names(data_2019[[4]]) <- append(c("directorio","secuencia_p","orden"),paste0("CINA_",colnames(data_2019[[4]][-1:-3])))
-names(data_2019[[5]]) <- append(c("directorio","secuencia_p","orden"),paste0("COCU_",colnames(data_2019[[5]][-1:-3])))
-
-names(data_2019[[7]]) <- append(c("directorio","secuencia_p","orden"),paste0("RDes_",colnames(data_2019[[7]][-1:-3])))
-names(data_2019[[8]]) <- append(c("directorio","secuencia_p","orden"),paste0("RFT_",colnames(data_2019[[8]][-1:-3])))
-names(data_2019[[9]]) <- append(c("directorio","secuencia_p","orden"),paste0("RINA_",colnames(data_2019[[9]][-1:-3])))
-names(data_2019[[10]]) <- append(c("directorio","secuencia_p","orden"),paste0("ROCU_",colnames(data_2019[[10]][-1:-3])))
-
-names(data_2020[[2]]) <- append(c("directorio","secuencia_p","orden"),paste0("CDes_",colnames(data_2020[[2]][-1:-3])))
-names(data_2020[[3]]) <- append(c("directorio","secuencia_p","orden"),paste0("CFT_",colnames(data_2020[[3]][-1:-3])))
-names(data_2020[[4]]) <- append(c("directorio","secuencia_p","orden"),paste0("CINA_",colnames(data_2020[[4]][-1:-3])))
-names(data_2020[[5]]) <- append(c("directorio","secuencia_p","orden"),paste0("COCU_",colnames(data_2020[[5]][-1:-3])))
-
-names(data_2020[[7]]) <- append(c("directorio","secuencia_p","orden"),paste0("RDes_",colnames(data_2020[[7]][-1:-3])))
-names(data_2020[[8]]) <- append(c("directorio","secuencia_p","orden"),paste0("RFT_",colnames(data_2020[[8]][-1:-3])))
-names(data_2020[[9]]) <- append(c("directorio","secuencia_p","orden"),paste0("RINA_",colnames(data_2020[[9]][-1:-3])))
-names(data_2020[[10]]) <- append(c("directorio","secuencia_p","orden"),paste0("ROCU_",colnames(data_2020[[10]][-1:-3])))
-
+# names(data_2019[[2]]) <- append(c("directorio","secuencia_p","orden"),paste0("CDes_",colnames(data_2019[[2]][-1:-3])))
+# names(data_2019[[3]]) <- append(c("directorio","secuencia_p","orden"),paste0("CFT_",colnames(data_2019[[3]][-1:-3])))
+# names(data_2019[[4]]) <- append(c("directorio","secuencia_p","orden"),paste0("CINA_",colnames(data_2019[[4]][-1:-3])))
+# names(data_2019[[5]]) <- append(c("directorio","secuencia_p","orden"),paste0("COCU_",colnames(data_2019[[5]][-1:-3])))
+# 
+# names(data_2019[[7]]) <- append(c("directorio","secuencia_p","orden"),paste0("RDes_",colnames(data_2019[[7]][-1:-3])))
+# names(data_2019[[8]]) <- append(c("directorio","secuencia_p","orden"),paste0("RFT_",colnames(data_2019[[8]][-1:-3])))
+# names(data_2019[[9]]) <- append(c("directorio","secuencia_p","orden"),paste0("RINA_",colnames(data_2019[[9]][-1:-3])))
+# names(data_2019[[10]]) <- append(c("directorio","secuencia_p","orden"),paste0("ROCU_",colnames(data_2019[[10]][-1:-3])))
+# 
+# names(data_2020[[2]]) <- append(c("directorio","secuencia_p","orden"),paste0("CDes_",colnames(data_2020[[2]][-1:-3])))
+# names(data_2020[[3]]) <- append(c("directorio","secuencia_p","orden"),paste0("CFT_",colnames(data_2020[[3]][-1:-3])))
+# names(data_2020[[4]]) <- append(c("directorio","secuencia_p","orden"),paste0("CINA_",colnames(data_2020[[4]][-1:-3])))
+# names(data_2020[[5]]) <- append(c("directorio","secuencia_p","orden"),paste0("COCU_",colnames(data_2020[[5]][-1:-3])))
+# 
+# names(data_2020[[7]]) <- append(c("directorio","secuencia_p","orden"),paste0("RDes_",colnames(data_2020[[7]][-1:-3])))
+# names(data_2020[[8]]) <- append(c("directorio","secuencia_p","orden"),paste0("RFT_",colnames(data_2020[[8]][-1:-3])))
+# names(data_2020[[9]]) <- append(c("directorio","secuencia_p","orden"),paste0("RINA_",colnames(data_2020[[9]][-1:-3])))
+# names(data_2020[[10]]) <- append(c("directorio","secuencia_p","orden"),paste0("ROCU_",colnames(data_2020[[10]][-1:-3])))
+# 
 
 
 
@@ -162,57 +164,204 @@ names(data_2020[[10]]) <- append(c("directorio","secuencia_p","orden"),paste0("R
 #------------1.2 Unir Datos -----------------
 
 #Inicializar llaves de los dataframes para hacer los joins
-#Inicializar suffix (parametro del full_join)
 
-keys = c("directorio","secuencia_p","orden")
-
-
-
-#Haremos full_join entre todos los dfs correspondientes a cabecera. Lo haremos en
-#dos partes. Primero un full_join entre todos los modulos de cabeceras del 2019.
-#Despues para el 2020.
-#Y finalmente combinamos ambos resultados
-
-BD_cabecera_temp = full_join(data_2019$`Cabecera - Desocupados`,data_2019$`Cabecera - Fuerza de trabajo`,by = keys)
-BD_cabecera_temp2 = full_join(BD_cabecera_temp,data_2019$`Cabecera - Inactivos`, by = keys)
-BD_cabecera_temp3 = full_join(data_2019$`Cabecera - Desocupados`,data_2019$`Cabecera - Ocupados`,by = keys)
+keys = c("directorio","secuencia_p","orden","mes","dpto","fex_c_2011")
+keys_full =  c("directorio","secuencia_p","orden")
 
 
-BD_cabecera_2019 = full_join(data_2019$`Cabecera - Desocupados`,data_2019$`Cabecera - Fuerza de trabajo`,by = keys) %>%
-  full_join(.,data_2019$`Cabecera - Inactivos`, by = keys) %>%
-  full_join(.,data_2019$`Cabecera - Ocupados`, by = keys ) 
+#
+#------------CABECERA 2019------
+#                                 
+#Lo siguiente se repetira para CABECERA 2020, RESTO 2019 Y RESTO 2020
 
+#Haremos Inner Join entre FT y OC, FT y DS, FT e IN
+#Esto tiene sentido porque FT = OC + DS + IN
+#luego los registros en OC estan en Ft, los de DS estan en FT, los de de IN estan en FT
+
+FT_OC = inner_join(data_2019$`Cabecera - Fuerza de trabajo`, data_2019$`Cabecera - Ocupados`, by = keys)
+FT_DS = inner_join(data_2019$`Cabecera - Fuerza de trabajo`, data_2019$`Cabecera - Desocupados`, by=keys)
+FT_IN = inner_join(data_2019$`Cabecera - Fuerza de trabajo`, data_2019$`Cabecera - Inactivos`, by=keys)
+
+#Haremos Full Join entre FT_OC y FT_DS
+FT_OC_DS = full_join(FT_OC, FT_DS, by = keys_full, suffix = c("_ocupados","_desocupados"))
+
+#Como las variables mes, fex_c_2011, y dpto son comunes entre ocupados, desocupados e inactivos
+#haremos un coalesce, para que nos quede una sola columna para cada variable.
+#Esto tiene sentido porque ocupados, desocupados e inactivos son conjuntos de
+#registros *mutuamente excluyentes*. Por lo tanto, si tenemos dos columnas de mes
+#(una para ocupados y otra para desocupados), cuando mes_ocupados tenga un valor
+#para una fila, mes_desocupados tendra un NA en esa misma fila. 
+#Esta misma logica aplicara cuando se haga el otro full join.
+
+#Idea tomada de https://stackoverflow.com/questions/14563531/combine-column-to-remove-nas
+
+FT_OC_DS <- FT_OC_DS %>% mutate(mes = coalesce(FT_OC_DS$mes_ocupados,FT_OC_DS$mes_desocupados)) %>% 
+  select(-mes_ocupados,-mes_desocupados)
+FT_OC_DS <- FT_OC_DS %>% mutate(fex_c_2011 = coalesce(FT_OC_DS$fex_c_2011_ocupados,FT_OC_DS$fex_c_2011_desocupados)) %>% 
+  select(-fex_c_2011_ocupados,-fex_c_2011_desocupados)
+FT_OC_DS <- FT_OC_DS %>% mutate(dpto = coalesce(FT_OC_DS$dpto_ocupados,FT_OC_DS$dpto_desocupados)) %>% 
+  select(-dpto_ocupados,-dpto_desocupados)
+FT_OC_DS <- FT_OC_DS %>% mutate(CTra = coalesce(FT_OC_DS$CTra_ocupados,FT_OC_DS$CTra_desocupados)) %>% 
+  select(-CTra_ocupados,-CTra_desocupados)
+
+#Full join con el resto (es decir con los registros de inactivos)
+FT_OC_DS_IN =full_join(FT_OC_DS, FT_IN, by = keys_full, suffix = c("_otro","_inactivos"))
+
+#Eliminar columnas duplicadas
+FT_OC_DS_IN <- FT_OC_DS_IN %>% mutate(mes = coalesce(FT_OC_DS_IN$mes_otro,FT_OC_DS_IN$mes_inactivos)) %>% 
+  select(-mes_otro,-mes_inactivos)
+FT_OC_DS_IN<- FT_OC_DS_IN %>% mutate(fex_c_2011 = coalesce(FT_OC_DS_IN$fex_c_2011_otro,FT_OC_DS_IN$fex_c_2011_inactivos)) %>% 
+  select(-fex_c_2011_otro,-fex_c_2011_inactivos)
+FT_OC_DS_IN<- FT_OC_DS_IN %>% mutate(dpto = coalesce(FT_OC_DS_IN$dpto_otro,FT_OC_DS_IN$dpto_inactivos)) %>% 
+  select(-dpto_otro,-dpto_inactivos)
+FT_OC_DS_IN<- FT_OC_DS_IN %>% mutate(CTra = coalesce(FT_OC_DS_IN$CTra_otro,FT_OC_DS_IN$CTra_inactivos)) %>% 
+  select(-CTra_otro,-CTra_inactivos)
+
+
+BD_cabecera_2019 = FT_OC_DS_IN
+rm(FT_OC_DS_IN)
 BD_cabecera_2019$ano <- 2019
 
-BD_cabecera_2020 = full_join(data_2020$Cabecera_Desocupados,data_2020$Cabecera_Fuerza_de_trabajo, by = keys ) %>%
-  full_join(.,data_2020$Cabecera_Inactivos, by = keys) %>% 
-  full_join(.,data_2020$Cabecera_Ocupados, by = keys)
-BD_cabecera_2020$ano <-2020
+rm(list = c("FT_DS","FT_IN", "FT_OC", "FT_OC_DS"))
+
+#
+#------------CABECERA 2020------
+#     
+
+FT_OC = inner_join(data_2020$Cabecera_Fuerza_de_trabajo, data_2020$Cabecera_Ocupados, by = keys)
+FT_DS = inner_join(data_2020$Cabecera_Fuerza_de_trabajo, data_2020$Cabecera_Desocupados, by=keys)
+FT_IN = inner_join(data_2020$Cabecera_Fuerza_de_trabajo, data_2020$Cabecera_Inactivos, by=keys)
+
+#Haremos Full Join entre FT_OC y FT_DS
+FT_OC_DS = full_join(FT_OC, FT_DS, by = keys_full, suffix = c("_ocupados","_desocupados"))
 
 
-BD_cabecera = full_join(BD_cabecera_2019, BD_cabecera_2020, by = c("directorio","secuencia_p","orden"))
+FT_OC_DS <- FT_OC_DS %>% mutate(mes = coalesce(FT_OC_DS$mes_ocupados,FT_OC_DS$mes_desocupados)) %>% 
+  select(-mes_ocupados,-mes_desocupados)
+FT_OC_DS <- FT_OC_DS %>% mutate(fex_c_2011 = coalesce(FT_OC_DS$fex_c_2011_ocupados,FT_OC_DS$fex_c_2011_desocupados)) %>% 
+  select(-fex_c_2011_ocupados,-fex_c_2011_desocupados)
+FT_OC_DS <- FT_OC_DS %>% mutate(dpto = coalesce(FT_OC_DS$dpto_ocupados,FT_OC_DS$dpto_desocupados)) %>% 
+  select(-dpto_ocupados,-dpto_desocupados)
+FT_OC_DS <- FT_OC_DS %>% mutate(CTra = coalesce(FT_OC_DS$CTra_ocupados,FT_OC_DS$CTra_desocupados)) %>% 
+  select(-CTra_ocupados,-CTra_desocupados)
+
+#Full join con el resto
+FT_OC_DS_IN =full_join(FT_OC_DS, FT_IN, by = keys_full, suffix = c("_otro","_inactivos"))
+
+#Eliminar columnas duplicadas
+FT_OC_DS_IN <- FT_OC_DS_IN %>% mutate(mes = coalesce(FT_OC_DS_IN$mes_otro,FT_OC_DS_IN$mes_inactivos)) %>% 
+  select(-mes_otro,-mes_inactivos)
+FT_OC_DS_IN<- FT_OC_DS_IN %>% mutate(fex_c_2011 = coalesce(FT_OC_DS_IN$fex_c_2011_otro,FT_OC_DS_IN$fex_c_2011_inactivos)) %>% 
+  select(-fex_c_2011_otro,-fex_c_2011_inactivos)
+FT_OC_DS_IN<- FT_OC_DS_IN %>% mutate(dpto = coalesce(FT_OC_DS_IN$dpto_otro,FT_OC_DS_IN$dpto_inactivos)) %>% 
+  select(-dpto_otro,-dpto_inactivos)
+FT_OC_DS_IN<- FT_OC_DS_IN %>% mutate(CTra = coalesce(FT_OC_DS_IN$CTra_otro,FT_OC_DS_IN$CTra_inactivos)) %>% 
+  select(-CTra_otro,-CTra_inactivos)
 
 
-#Hacemos lo mismo para 'Resto'
+BD_cabecera_2020 = FT_OC_DS_IN
+rm(FT_OC_DS_IN)
+BD_cabecera_2020$ano <- 2020
+rm(list = c("FT_DS","FT_IN", "FT_OC", "FT_OC_DS"))
 
 
-BD_Resto_2019 = full_join(data_2019$`Resto - Desocupados`,data_2019$`Resto - Fuerza de trabajo`,by = keys) %>% 
-  full_join(.,data_2019$`Resto - Inactivos`,by = keys) %>%
-  full_join(.,data_2019$`Resto - Ocupados`,by = keys)
-BD_Resto_2019$ano <- 2019
+#
+#------------RESTO 2019------
+#     
+
+FT_OC = inner_join(data_2019$`Resto - Fuerza de trabajo`, data_2019$`Resto - Ocupados`, by = keys)
+FT_DS = inner_join(data_2019$`Resto - Fuerza de trabajo`, data_2019$`Resto - Desocupados`, by=keys)
+FT_IN = inner_join(data_2019$`Resto - Fuerza de trabajo`, data_2019$`Resto - Inactivos`, by=keys)
+
+#Haremos Full Join entre FT_OC y FT_DS
+FT_OC_DS = full_join(FT_OC, FT_DS, by = keys_full, suffix = c("_ocupados","_desocupados"))
 
 
-BD_Resto_2020 = full_join(data_2020$Resto_Desocupados,data_2020$Resto_Fuerza_de_trabajo,by = keys) %>% 
-  full_join(.,data_2020$Resto_Inactivos,by = keys) %>% 
-  full_join(.,data_2020$Resto_Ocupados,by = keys)
-BD_Resto_2020$ano <- 2020
+FT_OC_DS <- FT_OC_DS %>% mutate(mes = coalesce(FT_OC_DS$mes_ocupados,FT_OC_DS$mes_desocupados)) %>% 
+  select(-mes_ocupados,-mes_desocupados)
+FT_OC_DS <- FT_OC_DS %>% mutate(fex_c_2011 = coalesce(FT_OC_DS$fex_c_2011_ocupados,FT_OC_DS$fex_c_2011_desocupados)) %>% 
+  select(-fex_c_2011_ocupados,-fex_c_2011_desocupados)
+FT_OC_DS <- FT_OC_DS %>% mutate(dpto = coalesce(FT_OC_DS$dpto_ocupados,FT_OC_DS$dpto_desocupados)) %>% 
+  select(-dpto_ocupados,-dpto_desocupados)
+FT_OC_DS <- FT_OC_DS %>% mutate(CTra = coalesce(FT_OC_DS$RTra_ocupados,FT_OC_DS$RTra_desocupados)) %>% 
+  select(-RTra_ocupados,-RTra_desocupados)
+
+#Full join con el resto
+FT_OC_DS_IN =full_join(FT_OC_DS, FT_IN, by = keys_full, suffix = c("_otro","_inactivos"))
+
+#Eliminar columnas duplicadas
+FT_OC_DS_IN <- FT_OC_DS_IN %>% mutate(mes = coalesce(FT_OC_DS_IN$mes_otro,FT_OC_DS_IN$mes_inactivos)) %>% 
+  select(-mes_otro,-mes_inactivos)
+FT_OC_DS_IN<- FT_OC_DS_IN %>% mutate(fex_c_2011 = coalesce(FT_OC_DS_IN$fex_c_2011_otro,FT_OC_DS_IN$fex_c_2011_inactivos)) %>% 
+  select(-fex_c_2011_otro,-fex_c_2011_inactivos)
+FT_OC_DS_IN<- FT_OC_DS_IN %>% mutate(dpto = coalesce(FT_OC_DS_IN$dpto_otro,FT_OC_DS_IN$dpto_inactivos)) %>% 
+  select(-dpto_otro,-dpto_inactivos)
+FT_OC_DS_IN<- FT_OC_DS_IN %>% mutate(RTra = coalesce(FT_OC_DS_IN$RTra_otro,FT_OC_DS_IN$RTra_inactivos)) %>% 
+  select(-RTra_otro,-RTra_inactivos)
+
+
+BD_resto_2019 = FT_OC_DS_IN
+rm(FT_OC_DS_IN)
+BD_resto_2019$ano <- 2019
+
+rm(list = c("FT_DS","FT_IN", "FT_OC", "FT_OC_DS"))
+
+
+#
+#------------RESTO 2020------
+#     
+
+FT_OC = inner_join(data_2020$Resto_Fuerza_de_trabajo, data_2020$Resto_Ocupados, by = keys)
+FT_DS = inner_join(data_2020$Resto_Fuerza_de_trabajo, data_2020$Resto_Desocupados, by=keys)
+FT_IN = inner_join(data_2020$Resto_Fuerza_de_trabajo, data_2020$Resto_Inactivos, by=keys)
+
+#Haremos Full Join entre FT_OC y FT_DS
+FT_OC_DS = full_join(FT_OC, FT_DS, by = keys_full, suffix = c("_ocupados","_desocupados"))
+
+
+FT_OC_DS <- FT_OC_DS %>% mutate(mes = coalesce(FT_OC_DS$mes_ocupados,FT_OC_DS$mes_desocupados)) %>% 
+  select(-mes_ocupados,-mes_desocupados)
+FT_OC_DS <- FT_OC_DS %>% mutate(fex_c_2011 = coalesce(FT_OC_DS$fex_c_2011_ocupados,FT_OC_DS$fex_c_2011_desocupados)) %>% 
+  select(-fex_c_2011_ocupados,-fex_c_2011_desocupados)
+FT_OC_DS <- FT_OC_DS %>% mutate(dpto = coalesce(FT_OC_DS$dpto_ocupados,FT_OC_DS$dpto_desocupados)) %>% 
+  select(-dpto_ocupados,-dpto_desocupados)
+FT_OC_DS <- FT_OC_DS %>% mutate(RTra = coalesce(FT_OC_DS$RTra_ocupados,FT_OC_DS$RTra_desocupados)) %>% 
+  select(-RTra_ocupados,-RTra_desocupados)
+
+#Full join con el resto
+FT_OC_DS_IN =full_join(FT_OC_DS, FT_IN, by = keys_full, suffix = c("_otro","_inactivos"))
+
+#Eliminar columnas duplicadas
+FT_OC_DS_IN <- FT_OC_DS_IN %>% mutate(mes = coalesce(FT_OC_DS_IN$mes_otro,FT_OC_DS_IN$mes_inactivos)) %>% 
+  select(-mes_otro,-mes_inactivos)
+FT_OC_DS_IN<- FT_OC_DS_IN %>% mutate(fex_c_2011 = coalesce(FT_OC_DS_IN$fex_c_2011_otro,FT_OC_DS_IN$fex_c_2011_inactivos)) %>% 
+  select(-fex_c_2011_otro,-fex_c_2011_inactivos)
+FT_OC_DS_IN<- FT_OC_DS_IN %>% mutate(dpto = coalesce(FT_OC_DS_IN$dpto_otro,FT_OC_DS_IN$dpto_inactivos)) %>% 
+  select(-dpto_otro,-dpto_inactivos)
+FT_OC_DS_IN<- FT_OC_DS_IN %>% mutate(RTra = coalesce(FT_OC_DS_IN$RTra_otro,FT_OC_DS_IN$RTra_inactivos)) %>% 
+  select(-RTra_otro,-RTra_inactivos)
+
+
+BD_resto_2020 = FT_OC_DS_IN
+rm(FT_OC_DS_IN)
+BD_resto_2020$ano <- 2020
+
+rm(list = c("FT_DS","FT_IN", "FT_OC", "FT_OC_DS"))
+
+
+########################################
+#Ahora combinamos las bases de cabecera por un lado
+#y las bases de resto por el otro
+#######################################
+
+BD_cabecera = full_join(BD_cabecera_2019, BD_cabecera_2020)
 
 #Note que agregamos una llave adicional: ano
-BD_resto = full_join(BD_Resto_2019,BD_Resto_2020, by =  c("directorio","secuencia_p","orden"))
+BD_resto = full_join(BD_resto_2019,BD_resto_2020)
 
 #Limpiar consola y dejar solo BD_resto y BD_cabecera
 rm(list = setdiff(ls(),c("BD_cabecera","BD_resto")))
 
 
 
-
+#
