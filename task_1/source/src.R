@@ -5,6 +5,8 @@
 
 #-----------------------TALLER B----------------------
 
+#--------------------Organizar GEIH-------------------
+
 rm(list = ls())
 
 #Importare paquetes necesarios para mis soluciones
@@ -13,7 +15,7 @@ library(pacman)
 library(rio)
 library(readr)
 
-#1. Organizar GEIH
+
 
 #1.1 Importar base de datos. 
 #
@@ -114,8 +116,8 @@ data_2019[[5]]$COcu <- 1
 
 data_2019[[7]]$RDes <- 1
 data_2019[[8]]$RTra <- 1
-data_2019[[9]]$RNac <- 1
-data_2019[[10]]$RCup <- 1
+data_2019[[9]]$RIna <- 1
+data_2019[[10]]$ROcu <- 1
 
 
 
@@ -126,24 +128,90 @@ data_2020[[5]]$COcu <- 1
 
 data_2020[[7]]$RDes <- 1
 data_2020[[8]]$RTra <- 1
-data_2020[[9]]$RNac <- 1
+data_2020[[9]]$RIna <- 1
 data_2020[[10]]$ROcu <- 1
 
-#Por ultimo agregare a cada df una variable año para saber a que año corresponde la encuesta
 
-for (i in 1:10){
-  
-  data_2019[[i]]$ano <- 2019
-  
-}
+##Agregarle un distintivo al nombre de las columnas, por ejemplo, mes, para que se sepa a cual DF pertence
+#Esto se hace para cada DF
+#Esto es importante para poder distinguir mejor las columnas cuando se haga el full join en el punto 1.2
+names(data_2019[[2]]) <- append(c("directorio","secuencia_p","orden"),paste0("CDes_",colnames(data_2019[[2]][-1:-3])))
+names(data_2019[[3]]) <- append(c("directorio","secuencia_p","orden"),paste0("CFT_",colnames(data_2019[[3]][-1:-3])))
+names(data_2019[[4]]) <- append(c("directorio","secuencia_p","orden"),paste0("CINA_",colnames(data_2019[[4]][-1:-3])))
+names(data_2019[[5]]) <- append(c("directorio","secuencia_p","orden"),paste0("COCU_",colnames(data_2019[[5]][-1:-3])))
 
-#El anterior for era necesario para poder seleccionar para cada dataframe las columnas 
-#que nos interesan i.e., las que estan en el vector variables.
+names(data_2019[[7]]) <- append(c("directorio","secuencia_p","orden"),paste0("RDes_",colnames(data_2019[[7]][-1:-3])))
+names(data_2019[[8]]) <- append(c("directorio","secuencia_p","orden"),paste0("RFT_",colnames(data_2019[[8]][-1:-3])))
+names(data_2019[[9]]) <- append(c("directorio","secuencia_p","orden"),paste0("RINA_",colnames(data_2019[[9]][-1:-3])))
+names(data_2019[[10]]) <- append(c("directorio","secuencia_p","orden"),paste0("ROCU_",colnames(data_2019[[10]][-1:-3])))
 
-for(i in 1:10){
-  data_2020[[i]]$ano <- 2020
-}
+names(data_2020[[2]]) <- append(c("directorio","secuencia_p","orden"),paste0("CDes_",colnames(data_2020[[2]][-1:-3])))
+names(data_2020[[3]]) <- append(c("directorio","secuencia_p","orden"),paste0("CFT_",colnames(data_2020[[3]][-1:-3])))
+names(data_2020[[4]]) <- append(c("directorio","secuencia_p","orden"),paste0("CINA_",colnames(data_2020[[4]][-1:-3])))
+names(data_2020[[5]]) <- append(c("directorio","secuencia_p","orden"),paste0("COCU_",colnames(data_2020[[5]][-1:-3])))
 
+names(data_2020[[7]]) <- append(c("directorio","secuencia_p","orden"),paste0("RDes_",colnames(data_2020[[7]][-1:-3])))
+names(data_2020[[8]]) <- append(c("directorio","secuencia_p","orden"),paste0("RFT_",colnames(data_2020[[8]][-1:-3])))
+names(data_2020[[9]]) <- append(c("directorio","secuencia_p","orden"),paste0("RINA_",colnames(data_2020[[9]][-1:-3])))
+names(data_2020[[10]]) <- append(c("directorio","secuencia_p","orden"),paste0("ROCU_",colnames(data_2020[[10]][-1:-3])))
+
+
+
+
+
+#------------1.2 Unir Datos -----------------
+
+#Inicializar llaves de los dataframes para hacer los joins
+#Inicializar suffix (parametro del full_join)
+
+keys = c("directorio","secuencia_p","orden")
+
+
+
+#Haremos full_join entre todos los dfs correspondientes a cabecera. Lo haremos en
+#dos partes. Primero un full_join entre todos los modulos de cabeceras del 2019.
+#Despues para el 2020.
+#Y finalmente combinamos ambos resultados
+
+BD_cabecera_temp = full_join(data_2019$`Cabecera - Desocupados`,data_2019$`Cabecera - Fuerza de trabajo`,by = keys)
+BD_cabecera_temp2 = full_join(BD_cabecera_temp,data_2019$`Cabecera - Inactivos`, by = keys)
+BD_cabecera_temp3 = full_join(data_2019$`Cabecera - Desocupados`,data_2019$`Cabecera - Ocupados`,by = keys)
+
+
+BD_cabecera_2019 = full_join(data_2019$`Cabecera - Desocupados`,data_2019$`Cabecera - Fuerza de trabajo`,by = keys) %>%
+  full_join(.,data_2019$`Cabecera - Inactivos`, by = keys) %>%
+  full_join(.,data_2019$`Cabecera - Ocupados`, by = keys ) 
+
+BD_cabecera_2019$ano <- 2019
+
+BD_cabecera_2020 = full_join(data_2020$Cabecera_Desocupados,data_2020$Cabecera_Fuerza_de_trabajo, by = keys ) %>%
+  full_join(.,data_2020$Cabecera_Inactivos, by = keys) %>% 
+  full_join(.,data_2020$Cabecera_Ocupados, by = keys)
+BD_cabecera_2020$ano <-2020
+
+
+BD_cabecera = full_join(BD_cabecera_2019, BD_cabecera_2020, by = c("directorio","secuencia_p","orden"))
+
+
+#Hacemos lo mismo para 'Resto'
+
+
+BD_Resto_2019 = full_join(data_2019$`Resto - Desocupados`,data_2019$`Resto - Fuerza de trabajo`,by = keys) %>% 
+  full_join(.,data_2019$`Resto - Inactivos`,by = keys) %>%
+  full_join(.,data_2019$`Resto - Ocupados`,by = keys)
+BD_Resto_2019$ano <- 2019
+
+
+BD_Resto_2020 = full_join(data_2020$Resto_Desocupados,data_2020$Resto_Fuerza_de_trabajo,by = keys) %>% 
+  full_join(.,data_2020$Resto_Inactivos,by = keys) %>% 
+  full_join(.,data_2020$Resto_Ocupados,by = keys)
+BD_Resto_2020$ano <- 2020
+
+#Note que agregamos una llave adicional: ano
+BD_resto = full_join(BD_Resto_2019,BD_Resto_2020, by =  c("directorio","secuencia_p","orden"))
+
+#Limpiar consola y dejar solo BD_resto y BD_cabecera
+rm(list = setdiff(ls(),c("BD_cabecera","BD_resto")))
 
 
 
