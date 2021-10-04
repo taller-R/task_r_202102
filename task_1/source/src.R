@@ -30,16 +30,16 @@ rm(list = ls())
 
 #Datos 2019
 # Los importa como dataframes
-`Cabecera - Caracteristicas generales (Personas)` <- readRDS("~/TallerR/task1/task_r_202102/task_1/data/input/2019/Cabecera - Caracteristicas generales (Personas).rds")
-`Cabecera - Desocupados` <- readRDS("~/TallerR/task1/task_r_202102/task_1/data/input/2019/Cabecera - Desocupados.rds")
-`Cabecera - Fuerza de trabajo` <- readRDS("~/TallerR/task1/task_r_202102/task_1/data/input/2019/Cabecera - Fuerza de trabajo.rds")
-`Cabecera - Inactivos` <- readRDS("~/TallerR/task1/task_r_202102/task_1/data/input/2019/Cabecera - Inactivos.rds")
-`Cabecera - Ocupados` <- readRDS("~/TallerR/task1/task_r_202102/task_1/data/input/2019/Cabecera - Ocupados.rds")
-`Resto - Caracteristicas generales (Personas)` <- readRDS("~/TallerR/task1/task_r_202102/task_1/data/input/2019/Resto - Caracteristicas generales (Personas).rds")
-`Resto - Desocupados` <- readRDS("~/TallerR/task1/task_r_202102/task_1/data/input/2019/Resto - Desocupados.rds")
-`Resto - Fuerza de trabajo` <- readRDS("~/TallerR/task1/task_r_202102/task_1/data/input/2019/Resto - Fuerza de trabajo.rds")
-`Resto - Inactivos` <- readRDS("~/TallerR/task1/task_r_202102/task_1/data/input/2019/Resto - Inactivos.rds")
-`Resto - Ocupados` <- readRDS("~/TallerR/task1/task_r_202102/task_1/data/input/2019/Resto - Ocupados.rds")
+`Cabecera - Caracteristicas generales (Personas)` <- readRDS("task_1/data/input/2019/Cabecera - Caracteristicas generales (Personas).rds")
+`Cabecera - Desocupados` <- readRDS("task_1/data/input/2019/Cabecera - Desocupados.rds")
+`Cabecera - Fuerza de trabajo` <- readRDS("task_1/data/input/2019/Cabecera - Fuerza de trabajo.rds")
+`Cabecera - Inactivos` <- readRDS("task_1/data/input/2019/Cabecera - Inactivos.rds")
+`Cabecera - Ocupados` <- readRDS("task_1/data/input/2019/Cabecera - Ocupados.rds")
+`Resto - Caracteristicas generales (Personas)` <- readRDS("task_1/data/input/2019/Resto - Caracteristicas generales (Personas).rds")
+`Resto - Desocupados` <- readRDS("task_1/data/input/2019/Resto - Desocupados.rds")
+`Resto - Fuerza de trabajo` <- readRDS("task_1/data/input/2019/Resto - Fuerza de trabajo.rds")
+`Resto - Inactivos` <- readRDS("task_1/data/input/2019/Resto - Inactivos.rds")
+`Resto - Ocupados` <- readRDS("task_1/data/input/2019/Resto - Ocupados.rds")
 
 
 #Lista cuyos elementos son los dataframes con la informacion del 2019. mget(ls()) retorna los objetos que tengo en el environment hasta el momento
