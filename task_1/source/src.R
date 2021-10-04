@@ -464,7 +464,7 @@ BD_nacional$dpto[BD_nacional$dpto == 68] <-"Santander"
 BD_nacional$dpto[BD_nacional$dpto == 73] <-"Tolima"
 BD_nacional$dpto[BD_nacional$dpto == 76] <-"Valle del Cauca"
 
-#La condición que sea mayor a 2 es porque hay identificadores que no encontre a
+#La condición que sea mayor a 2 es porque para algunos identificadores no encontre a
 #cual departamento correspondia. No es la mejor solucion escribir que sea mayor a 2
 #pero al menos me garantiza, para este caso, que estoy descartando entradas que no sean verdaderos nombres de dptos
 
@@ -484,11 +484,19 @@ filter(BD_nacional, grupo==1 & !is.na(inglabo)) %>% group_by(ano) %>%  summarise
 filter(BD_nacional, grupo==1 & !is.na(inglabo)) %>% group_by(ano,zona) %>%  summarise(promedio = mean(inglabo), varianza = var(inglabo))
 
 
-#-----------Graficos------------
+#-----Estadisticas sobre los ingresos 
+filter(BD_nacional, !is.na(inglabo)) %>%  select(inglabo) %>% skim()
+
+
+
+
+##-----------Graficos------------##
+
 
 filter(BD_nacional,nchar(dpto)>2) %>%  group_by(grupo,ano,dpto) %>% summarise(total = table(inglabo))
 
 
+#Construir grafico con los ingresos salariales promedio para el 2019 por departamento
 ing_promedio_2019 = filter(BD_nacional,nchar(dpto)>2 & grupo==1 & !is.na(inglabo) & ano==2019) %>% 
   group_by(dpto) %>%  
   summarise(promedio = mean(inglabo)) %>% 
@@ -506,17 +514,43 @@ ing_promedio_2019 = filter(BD_nacional,nchar(dpto)>2 & grupo==1 & !is.na(inglabo
   theme_light() + 
   theme(plot.title = element_text(hjust = 0.5))
 
+#Desplegar en la consola la grafica
 ing_promedio_2019
+
+
+#Construir grafico con los ingresos salariales promedio para por departamento y por ano
+#idea https://www.r-graph-gallery.com/48-grouped-barplot-with-ggplot2.html
+temp = filter(BD_nacional,nchar(dpto)>2 & grupo==1 & !is.na(inglabo)) %>% 
+  group_by(dpto,ano) %>%  
+  summarise(promedio = mean(inglabo))
+temp <- temp %>% mutate_at("ano", as.character)
+
+ing_promedio = ggplot(temp,aes(x=dpto,y=promedio,fill=ano)) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  labs(
+    x = "Departamento",
+    y = "Ingresos promedio",
+    title = paste(
+      "Ingresos laborales promedio 2019 y 2020"
+    ))+
+  theme(plot.title = element_text(hjust = 0.5))
+#Desplegar grafico
+ing_promedio
+
+#Construir Tree map para ver la proporicion de Ocupados, Desocupados e Inactivos por zonas
+#para el año 2019.
+#Idea sacada de https://www.r-graph-gallery.com/236-custom-your-treemap.html
 
 temp = filter(BD_nacional,ano==2019) %>%  group_by(grupo,zona) %>% summarise(total = table(grupo))
 temp <- temp %>% mutate_at("total", as.numeric)
 
- treemap(temp,
+
+treemap_1 = treemap(temp,
           index= c("grupo","zona"),
           vSize="total",
           type = "index",
           title= "Proporcion de DS, OC e IN por zonas",
-         bg.labels=c("transparent"),              # Background color of labels
+         bg.labels=c("transparent"),              
          align.labels=list(
            c("center", "center"), 
            c("right", "bottom")
@@ -524,8 +558,34 @@ temp <- temp %>% mutate_at("total", as.numeric)
   )
  
  rm(temp)
- rm(data)
+
+#Construir Tree map para ver la proporicion de Ocupados, Desocupados e Inactivos por zonas
+#y por años
+temp = BD_nacional %>%  group_by(grupo,zona,ano) %>% summarise(total = table(grupo))
+temp <- temp %>% mutate_at("total", as.numeric)
+
+treemap_2 = treemap(temp,
+        index= c("grupo","zona","ano"),
+        vSize="total",
+        type = "index",
+        title= "Proporcion de DS, OC e IN por zonas y por años",
+        bg.labels=c("transparent"),              
+        align.labels=list(
+          c("center", "center"), 
+          c("right", "bottom")
+        ) 
+)
+rm(temp)
+
 
 cat("\014")
-rm(list= setdiff(ls(),"BD_nacional"))
+
+#Guardar graficos como .jpeg en carpeta views 
+
+### Como jpeg
+ggsave(plot = ing_promedio, file="task_1/views/ing_primedio.jpeg")
+#los otros los guarde manualmente. En particular no encontre un comando que
+#guardara los tree maps
+
+
   
